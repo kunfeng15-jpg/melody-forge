@@ -4,12 +4,14 @@ export interface Song {
   id: number;
   title: string;
   artist: string;
-  genre: string;
-  mood: string;
+  album?: string;
+  genre?: string;
+  mood?: string;
   duration: number;
   filePath: string;
-  isAiGenerated: boolean;
+  coverUrl?: string;
   lyrics?: string;
+  isAiGenerated: boolean;
 }
 
 export interface PlayerState {

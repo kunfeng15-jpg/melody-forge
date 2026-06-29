@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { PlayerControls } from './components/PlayerControls';
 import { HomePage } from './pages/HomePage';
 import { GeneratePage } from './pages/GeneratePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { AudioVisualizer } from './components/AudioVisualizer';
 import { LyricsDisplay } from './components/LyricsDisplay';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 import { useAudioVisualizer } from './hooks/useAudioVisualizer';
+import { useSongStore } from './stores/useSongStore';
+import { useSettingsStore } from './stores/useSettingsStore';
 import { Song } from './types/audio';
 
 // Mock data for testing
@@ -37,10 +40,14 @@ const mockSongs: Song[] = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const { songs, favorites, fetchSongs, fetchFavorites, setSongs, toggleFavorite } = useSongStore();
+  const { showVisualization } = useSettingsStore();
 
   const player = useAudioPlayer();
   const { initAnalyser, getFrequencyData } = useAudioVisualizer(player.audioRef);
+
+  const visibleSongs = songs.length > 0 ? songs : mockSongs;
+  const favoriteSet = useMemo(() => new Set(favorites), [favorites]);
 
   // Initialize audio visualizer when playback starts
   useEffect(() => {
@@ -49,25 +56,19 @@ function App() {
     }
   }, [player.isPlaying, initAnalyser]);
 
+  useEffect(() => {
+    setSongs(mockSongs);
+    fetchSongs();
+    fetchFavorites();
+  }, [fetchFavorites, fetchSongs, setSongs]);
+
   const handlePlaySong = (song: Song) => {
     if (player.currentSong?.id === song.id) {
       player.togglePlay();
     } else {
-      player.loadSong(song, mockSongs);
+      player.loadSong(song, visibleSongs);
       player.play();
     }
-  };
-
-  const handleToggleFavorite = (songId: number) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (next.has(songId)) {
-        next.delete(songId);
-      } else {
-        next.add(songId);
-      }
-      return next;
-    });
   };
 
   const handlePlayGenerated = (song: Song) => {
@@ -82,22 +83,23 @@ function App() {
         <main className="flex-1 overflow-y-auto pb-24">
           {activeTab === 'home' && (
             <HomePage
-              songs={mockSongs}
+              songs={visibleSongs}
               currentSong={player.currentSong}
               isPlaying={player.isPlaying}
-              favorites={favorites}
+              favorites={favoriteSet}
               onPlaySong={handlePlaySong}
-              onToggleFavorite={handleToggleFavorite}
+              onToggleFavorite={toggleFavorite}
             />
           )}
           {activeTab === 'generate' && (
             <GeneratePage onPlaySong={handlePlayGenerated} />
           )}
+          {activeTab === 'settings' && <SettingsPage />}
           {/* Other tabs will be implemented later */}
         </main>
 
         {/* Audio Visualizer */}
-        {player.currentSong && (
+        {showVisualization && player.currentSong && (
           <div className="px-4 pt-2">
             <AudioVisualizer
               getFrequencyData={getFrequencyData}
