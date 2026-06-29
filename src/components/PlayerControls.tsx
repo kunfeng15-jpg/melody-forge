@@ -35,11 +35,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         {/* Song info */}
         <div className="w-48 flex items-center gap-3">
           <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
-            {currentSong?.coverUrl ? (
-              <img src={currentSong.coverUrl} alt="" className="w-full h-full rounded-lg object-cover" />
-            ) : (
-              <span className="text-gray-500 text-xs">♪</span>
-            )}
+            <span className="text-gray-500 text-xs">♪</span>
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-medium truncate">{currentSong?.title || 'No song'}</p>
