@@ -14,9 +14,10 @@
 ## 项目信息
 
 - **仓库:** https://github.com/kunfeng15-jpg/melody-forge
-- **前端:** React 18 + TypeScript + Tailwind CSS + Zustand
-- **后端:** Python FastAPI + SQLite
-- **当前状态:** 基础播放器 + AI 生成骨架已完成
+- **前端:** React 18 + TypeScript + Tailwind CSS + Zustand（尚未安装，需自行 `npm install zustand`）
+- **当前状态:** 基础播放器 + AI 生成 + 音频可视化 + 歌词显示 已完成
+- **最新代码:** https://github.com/kunfeng15-jpg/melody-forge/tree/master
+- **重要:** 请先 `git pull origin master` 获取最新代码，基于 master 分支工作
 
 ## 具体任务
 
