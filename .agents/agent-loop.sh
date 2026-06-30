@@ -17,17 +17,12 @@ while true; do
         git reset --hard "origin/$BRANCH"
         git clean -fd
         npm install 2>&1 | tail -1
-        for TASK_FILE in "$PROJECT_DIR"/TASK_frontend_*.md "$PROJECT_DIR"/TASK_backend_*.md; do
+        for TASK_FILE in "$PROJECT_DIR"/TASK_*.md; do
             [ -f "$TASK_FILE" ] || continue
             TASK_NAME=$(basename "$TASK_FILE" .md)
             LOG_FILE="$LOG_DIR/${TASK_NAME}-$(date +%Y%m%d-%H%M%S).log"
-            if [[ "$TASK_FILE" == *"frontend"* ]]; then
-                echo "→ Claude Code: $TASK_NAME"
-                claude -p "读取 $TASK_NAME.md 并执行所有任务，完成后 npm run build 验证，然后 git add -A && git commit -m 'auto: $TASK_NAME' && git push origin $BRANCH" --dangerously-skip-permissions >> "$LOG_FILE" 2>&1
-            elif [[ "$TASK_FILE" == *"backend"* ]]; then
-                echo "→ Codex: $TASK_NAME"
-                codex exec -p "读取 $TASK_NAME.md 并执行所有任务，完成后 git add -A && git commit -m 'auto: $TASK_NAME' && git push origin $BRANCH" >> "$LOG_FILE" 2>&1
-            fi
+            echo "→ Codex: $TASK_NAME"
+            codex exec -p "读取 $TASK_NAME.md 并执行所有任务。执行过程中不要询问用户意见，直接做决策。完成后运行: git add -A && git commit -m 'auto: $TASK_NAME' && git push origin $BRANCH" >> "$LOG_FILE" 2>&1
             rm -f "$TASK_FILE"
         done
         sleep 5; git fetch origin $BRANCH; git reset --hard "origin/$BRANCH"
