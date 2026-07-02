@@ -21,9 +21,10 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# 3. 安装后端依赖
-echo "→ 安装后端依赖..."
-pip3 install -r ai-service/requirements.txt 2>/dev/null || pip install -r ai-service/requirements.txt
+# 安装后端核心依赖（不含 torch/audiocraft，太重）
+echo "→ 安装后端核心依赖..."
+pip3 install -r ai-service/requirements-core.txt 2>/dev/null || echo "   ⚠ pip3 不可用，尝试 python3 -m pip..."
+python3 -m pip install -r ai-service/requirements-core.txt 2>/dev/null || true
 
 # 4. 启动后端（后台）
 echo "→ 启动后端服务 (端口 8000)..."
