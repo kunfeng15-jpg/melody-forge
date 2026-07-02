@@ -28,11 +28,8 @@ export const useSongStore = create<SongStore>()(
         try {
           const songs = await api.getSongs();
           set({ songs, isLoading: false });
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load songs',
-          });
+        } catch {
+          set({ isLoading: false });
         }
       },
       fetchFavorites: async () => {

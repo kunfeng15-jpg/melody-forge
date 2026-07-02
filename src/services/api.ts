@@ -55,21 +55,24 @@ export interface UpdatePlaylistRequest {
   cover_url?: string;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
+async function request<T>(path: string, options: RequestInit = {}): Promise<T | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
 
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json() as Promise<T>;
+  } catch {
+    return null;
   }
-
-  return response.json() as Promise<T>;
 }
 
 function mapSong(song: ApiSong): Song {
@@ -105,11 +108,11 @@ export const api = {
     }),
   getSongs: async () => {
     const songs = await request<ApiSong[]>('/songs');
-    return songs.map(mapSong);
+    return songs ? songs.map(mapSong) : [];
   },
   getFavorites: async () => {
     const songs = await request<ApiSong[]>('/favorites');
-    return songs.map(mapSong);
+    return songs ? songs.map(mapSong) : [];
   },
   addFavorite: (songId: number) =>
     request<{ success: boolean }>(`/favorites?song_id=${songId}`, {
@@ -121,11 +124,11 @@ export const api = {
     }),
   getPlaylists: async () => {
     const playlists = await request<Array<Playlist & { songs?: ApiSong[] }>>('/playlists');
-    return playlists.map(mapPlaylist);
+    return playlists ? playlists.map(mapPlaylist) : [];
   },
   getPlaylist: async (playlistId: number) => {
     const playlist = await request<Playlist & { songs?: ApiSong[] }>(`/playlists/${playlistId}`);
-    return mapPlaylist(playlist);
+    return playlist ? mapPlaylist(playlist) : null;
   },
   createPlaylist: (data: CreatePlaylistRequest) =>
     request<Playlist>('/playlists', {
